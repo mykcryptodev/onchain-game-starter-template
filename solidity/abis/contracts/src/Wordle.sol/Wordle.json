@@ -1,0 +1,10 @@
+[
+  "constructor()",
+  "event WinnerRecorded(uint256 indexed,address,uint256)",
+  "function admin() view returns (address)",
+  "function getGameResult(uint256) view returns (address[], uint256[])",
+  "function guessCount(uint256,address) view returns (uint256)",
+  "function recordWinner(uint256,address,uint256)",
+  "function setAdmin(address)",
+  "function winners(uint256,uint256) view returns (address)"
+]

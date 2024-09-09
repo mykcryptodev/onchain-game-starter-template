@@ -8,7 +8,7 @@ contract Wordle {
     mapping(string => mapping(address => uint256)) public guessCount;
 
     event WinnerRecorded(
-        string indexed gameDay,
+        string indexed gameId,
         address winner,
         uint256 guessCount
     );

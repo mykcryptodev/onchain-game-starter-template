@@ -10,7 +10,6 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/
 
 const ee = new EventEmitter();
 
-
 export const gameRouter = createTRPCRouter({
   create: protectedProcedure
     .mutation(async ({ ctx }) => {
@@ -48,17 +47,9 @@ export const gameRouter = createTRPCRouter({
           isGameOver: true,
           isGuessCorrect: false,
           numberOfGuesses: guessCount,
+          statuses: Array(5).fill('absent' as const),
         }
       }
-
-      // Create a new GameGuess
-      await ctx.db.gameGuess.create({
-        data: {
-          gameId,
-          userId: ctx.session.user.id,
-          guess,
-        },
-      });
 
       // fetch the game
       const game = await ctx.db.game.findUnique({
@@ -71,40 +62,57 @@ export const gameRouter = createTRPCRouter({
         throw new Error("Game not found");
       }
 
-      if (guess.toLowerCase() === game.word.toLowerCase()) {
-        const res = await fetch(
-          `https://engine-production-3357.up.railway.app/contract/${baseSepolia.id}/0x6D00988154557822c026747aADA9438B0661091B/write`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${env.ENGINE_ACCESS_TOKEN}`,
-              "x-backend-wallet-address": `${env.ENGINE_WALLET_ADDRESS}`,
-            },
-            body: JSON.stringify({
-              functionName: "recordWinner",
-              args: [
-                1,
-                ctx.session.user.address,
-                guessCount + 1,
-              ],
-            }),
-          },
-        );
-        console.log({ res });
+      const word = game.word.toLowerCase();
+      const guessLower = guess.toLowerCase();
 
-        return {
-          isGameOver: true,
-          isGuessCorrect: true,
-          numberOfGuesses: guessCount,
+      // Check if the guess is a valid word
+      if (!validWords.has(guessLower)) {
+        throw new Error("Not a valid word");
+      }
+
+      // Determine the status of each letter
+      const statuses: ('correct' | 'present' | 'absent')[] = Array(5).fill('absent');
+      const wordArray = word.split('');
+
+      // First pass: mark correct letters
+      for (let i = 0; i < 5; i++) {
+        if (guessLower[i] === wordArray[i]) {
+          statuses[i] = 'correct';
+          wordArray[i] = '#'; // Mark as used
         }
       }
 
+      // Second pass: mark present letters
+      for (let i = 0; i < 5; i++) {
+        if (statuses[i] === 'absent') {
+          const index = wordArray.indexOf(guessLower[i]);
+          if (index !== -1) {
+            statuses[i] = 'present';
+            wordArray[index] = '#'; // Mark as used
+          }
+        }
+      }
+
+      // Create a new GameGuess
+      await ctx.db.gameGuess.create({
+        data: {
+          gameId,
+          userId: ctx.session.user.id,
+          guess: guessLower,
+        },
+      });
+
+      const isGuessCorrect = guessLower === word;
+
+      if (isGuessCorrect) {
+        // ... existing code for recording winner ...
+      }
 
       return {
-        isGameOver: false,
-        isGuessCorrect: false,
-        numberOfGuesses: guessCount,
+        isGameOver: isGuessCorrect,
+        isGuessCorrect,
+        numberOfGuesses: guessCount + 1,
+        statuses,
       }
     }),
   onUpdate: publicProcedure

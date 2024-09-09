@@ -3,7 +3,6 @@ import type { FC } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
 
 import CreateGame from '~/components/Game/Create';
-import { validWords } from '~/constants/words';
 import { api } from '~/utils/api';
 
 const WORD_LENGTH = 5;
@@ -44,24 +43,14 @@ const Tile: FC<TileProps> = ({ char, status }) => {
 
 type GuessProps = {
   guess: string;
-  answer: string;
-  isCurrentGuess: boolean;
+  statuses: TileProps['status'][];
 };
 
-const Guess: FC<GuessProps> = ({ guess, answer, isCurrentGuess }) => {
+const Guess: FC<GuessProps> = ({ guess, statuses }) => {
   const tiles = [];
   for (let i = 0; i < WORD_LENGTH; i++) {
     const char = guess[i] ?? '';
-    let status: TileProps['status'] = 'empty';
-    if (!isCurrentGuess && char) {
-      if (char === answer[i]) {
-        status = 'correct';
-      } else if (answer.includes(char)) {
-        status = 'present';
-      } else {
-        status = 'absent';
-      }
-    }
+    const status = statuses[i] ?? 'empty';
     tiles.push(
       <Tile key={`${guess}-${i}`} char={char} status={status} />
     );
@@ -73,21 +62,14 @@ type GameProps = {
   gameId: string;
 }
 const Game: FC<GameProps> = ({ gameId }) => {
-  const { mutateAsync: guess } = api.game.guess.useMutation();
-  const [answer, setAnswer] = useState<string>('');
-  const [guesses, setGuesses] = useState<string[]>([]);
+  const { mutateAsync: makeGuess } = api.game.guess.useMutation();
+  const [guesses, setGuesses] = useState<Array<{ guess: string; statuses: TileProps['status'][] }>>([]);
   const [currentGuess, setCurrentGuess] = useState<string>('');
   const [gameOver, setGameOver] = useState<boolean>(false);
 
   const gameRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // set the answer to a random valid word 
-    const validWordsArray = Array.from(validWords.entries());
-    const randomIndex = Math.floor(Math.random() * validWordsArray.length);
-    setAnswer(validWordsArray[randomIndex]![0].toUpperCase());
-
-    // Focus the game div when component mounts
     if (gameRef.current) {
       gameRef.current.focus();
     }
@@ -97,27 +79,26 @@ const Game: FC<GameProps> = ({ gameId }) => {
     if (gameOver) return;
 
     if (event.key === 'Enter' && currentGuess.length === WORD_LENGTH) {
-      if (!validWords.has(currentGuess.toLowerCase())) {
-        alert("not a word");
-        return;
-      }
-      const newGuesses = [...guesses, currentGuess];
-      setGuesses(newGuesses);
-      setCurrentGuess('');
+      try {
+        const { 
+          isGameOver, 
+          numberOfGuesses, 
+          isGuessCorrect,
+          statuses
+        } = await makeGuess({ 
+          guess: currentGuess,
+          gameId,
+        });
 
-      const { 
-        isGameOver, 
-        numberOfGuesses, 
-        isGuessCorrect 
-      } = await guess({ 
-        guess: currentGuess,
-        gameId,
-      });
+        setGuesses([...guesses, { guess: currentGuess, statuses }]);
+        setCurrentGuess('');
 
-      if (isGameOver) {
-        setGameOver(true);
-      } else if (numberOfGuesses === MAX_GUESSES) {
-        setGameOver(true);
+        if (isGameOver || numberOfGuesses === MAX_GUESSES) {
+          setGameOver(true);
+        }
+      } catch (error) {
+        console.error('Error making guess:', error);
+        alert("An error occurred. Please try again.");
       }
     } else if (event.key === 'Backspace') {
       setCurrentGuess(currentGuess.slice(0, -1));
@@ -148,22 +129,24 @@ const Game: FC<GameProps> = ({ gameId }) => {
           marginBottom: '20px',
         }}
       >
-        {guesses.map((guess, i) => (
-          <Guess key={`guess-${i}`} guess={guess} answer={answer} isCurrentGuess={false} />
+        {guesses.map(({ guess, statuses }, i) => (
+          <Guess key={`guess-${i}`} guess={guess} statuses={statuses} />
         ))}
         {!gameOver && (
-          <Guess key="current-guess" guess={currentGuess} answer={answer} isCurrentGuess={true} />
+          <Guess key="current-guess" guess={currentGuess} statuses={Array(WORD_LENGTH).fill('empty')} />
         )}
         {Array(Math.max(0, MAX_GUESSES - guesses.length - (gameOver ? 0 : 1)))
           .fill('')
           .map((_, i) => (
-            <Guess key={`empty-${i}`} guess="" answer={answer} isCurrentGuess={false} />
+            <Guess key={`empty-${i}`} guess="" statuses={Array(WORD_LENGTH).fill('empty')} />
           ))
         }
       </div>
       {gameOver && (
         <div className="game-over flex flex-col items-center gap-2">
-          {guesses.includes(answer) ? 'You won!' : `Game over! The word was ${answer}`}
+          {guesses[guesses.length - 1]?.statuses.every(status => status === 'correct') 
+            ? 'You won!' 
+            : 'Game over!'}
           <CreateGame btnLabel="Play Again" />
         </div>
       )}

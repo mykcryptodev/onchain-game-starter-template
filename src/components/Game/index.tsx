@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/prefer-regexp-exec */
 import type { FC } from "react";
 import React, { useEffect, useRef, useState } from "react";
+import { toast } from "react-toastify";
 
 import CreateGame from "~/components/Game/Create";
 import { api } from "~/utils/api";
@@ -112,10 +113,20 @@ const Game: FC<GameProps> = ({ gameId }) => {
 
         if (isGameOver || numberOfGuesses === MAX_GUESSES) {
           setGameOver(true);
+          // if everything is correct, toast a win
+          if (statuses.every((status) => status === "correct")) {
+            toast.success("You won!");
+          } else {
+            toast.error("Game over!");
+          }
         }
       } catch (error) {
-        console.error("Error making guess:", error);
-        alert("An error occurred. Please try again.");
+        const e = error as Error;
+        if (e.message.includes("valid word")) {
+          toast.error("Not a word.");
+        } else {
+          toast.error("An error occurred. Please try again.");
+        }
       }
     } else if (event.key === "Backspace") {
       setCurrentGuess(currentGuess.slice(0, -1));

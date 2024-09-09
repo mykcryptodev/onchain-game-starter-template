@@ -4,11 +4,13 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { type Session } from "next-auth";
 import { SessionProvider } from "next-auth/react";
+import { ToastContainer } from 'react-toastify';
 
 import Layout from "~/components/utils/Layout";
 import { APP_DESCRIPTION, APP_NAME, APP_URL } from "~/constants";
 import { api } from "~/utils/api";
 
+import 'react-toastify/dist/ReactToastify.css';
 import '@coinbase/onchainkit/styles.css';
 import "~/styles/globals.css";
 
@@ -64,6 +66,7 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <OnchainProviders>
           <Layout>
             <Component {...pageProps} />
+            <ToastContainer position="top-center" />
           </Layout>
           <div id="portal" />
         </OnchainProviders>

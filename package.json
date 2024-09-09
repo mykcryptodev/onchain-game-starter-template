@@ -34,6 +34,7 @@
     "phaser": "^3.85.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-toastify": "^10.0.5",
     "siwe": "^2.3.2",
     "superjson": "^2.2.1",
     "ws": "^8.18.0",

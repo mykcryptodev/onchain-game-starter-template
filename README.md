@@ -9,15 +9,15 @@ This starter kit is built on the [T3 Stack](https://create.t3.gg/), which provid
 1. **Frontend**: Next.js with React, styled using Tailwind CSS and DaisyUI
 2. **API Layer**: tRPC for type-safe API endpoints
 3. **Web2 Backend**: PostgreSQL database with Prisma ORM
-4. **Onchain Backend**: Connection to the Base Sepolia testnet (EVM-compatible blockchain)
+4. **Onchain Backend**: Connection to the Base Sepolia testnet (EVM-compatible blockchain) with Viem and Wagmi
 5. **Authentication**: NextAuth.js with Sign In With Ethereum (SIWE) support
-6. **Smart Contract Development**: Solidity contracts with testing setup
+6. **Smart Contract Development**: Solidity contracts with testing setup using Hardhat or Foundry
 
 ## Technology Deep Dive
 
 ### Next.js and T3 Stack
 
-The application is built using [Next.js](https://nextjs.org/), a powerful React framework for building web applications. The T3 Stack adds additional tools and best practices:
+The application is built using [Next.js](https://nextjs.org/), a powerful React framework for building web applications. The T3 Stack adds additional tools:
 
 - **TypeScript**: Used throughout the app for type safety
 - **tRPC**: Enables the creation of type-safe API endpoints
@@ -29,23 +29,23 @@ The application is built using [Next.js](https://nextjs.org/), a powerful React 
 - **Prisma**: An ORM that provides type-safe database queries and model definitions
 - **tRPC Procedures**: Used to interact with the database, ensuring type safety from the database to the frontend
 
-### Onchain Backend
+### Onchain Connections
 
 - **Base Sepolia**: The default testnet for this starter kit (easily configurable to other EVM-compatible networks)
-- **Viem and Wagmi**: Libraries for interacting with the blockchain
 - **OnchainKit**: A library for frontend blockchain interactions, including wallet connection and Coinbase Smart Wallet integration
-
-### Frontend
-
-- **React**: A popular library for building user interfaces
-- **Tailwind CSS**: Used for styling components
-- **DaisyUI**: A component library built on top of Tailwind, providing ready-to-use UI components and theming capabilities
+- **Viem and Wagmi**: Libraries for interacting with the blockchain that come backed with OnchainKit
 
 ### Authentication
 
 - **NextAuth**: Handles user authentication
 - **Sign In With Ethereum (SIWE)**: Allows users to authenticate using their crypto wallets
 - **Session Management**: Enables secure, wallet-based authentication for backend requests
+
+### Frontend
+
+- **React**: A popular library for building user interfaces
+- **Tailwind CSS**: Used for styling components
+- **DaisyUI**: A component library built on top of Tailwind, providing ready-to-use UI components and theming capabilities
 
 ### Smart Contract Development
 

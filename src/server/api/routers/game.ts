@@ -146,35 +146,6 @@ export const gameRouter = createTRPCRouter({
         statuses,
       };
     }),
-  onUpdate: publicProcedure
-    .input(
-      z
-        .object({
-          // lastEventId is the last event id that the client has received
-          // On the first call, it will be whatever was passed in the initial setup
-          // If the client reconnects, it will be the last event id that the client received
-          lastEventId: z.string().nullish(),
-        })
-        .optional(),
-    )
-    .subscription(async function* (opts) {
-      console.log("Subscription initiated for game:", opts?.input?.lastEventId);
-      if (opts?.input?.lastEventId) {
-        // [...] get the game since the last event id and yield them
-        const game = await getGame({
-          input: { id: opts.input.lastEventId },
-          ctx: opts.ctx,
-        });
-        yield tracked(game.id, game);
-      }
-      // listen for new events
-      for await (const [data] of on(ee, "updateGame")) {
-        const gameId = data as string;
-        const game = await getGame({ input: { id: gameId }, ctx: opts.ctx });
-        // tracking the post id ensures the client can reconnect at any time and get the latest events this id
-        yield tracked(game.id, game);
-      }
-    }),
   getGuesses: protectedProcedure
     .input(
       z.object({
@@ -203,6 +174,39 @@ export const gameRouter = createTRPCRouter({
       })));
 
       return guessesWithStatuses;
+    }),
+  // This procedure is unused in this example but it showcases
+  // how to subscribe to database updates from the client.
+  // If you use subscriptions, be sure that your servers do not
+  // go to sleep or you will lose the connection.
+  onUpdate: publicProcedure
+    .input(
+      z
+        .object({
+          // lastEventId is the last event id that the client has received
+          // On the first call, it will be whatever was passed in the initial setup
+          // If the client reconnects, it will be the last event id that the client received
+          lastEventId: z.string().nullish(),
+        })
+        .optional(),
+    )
+    .subscription(async function* (opts) {
+      console.log("Subscription initiated for game:", opts?.input?.lastEventId);
+      if (opts?.input?.lastEventId) {
+        // [...] get the game since the last event id and yield them
+        const game = await getGame({
+          input: { id: opts.input.lastEventId },
+          ctx: opts.ctx,
+        });
+        yield tracked(game.id, game);
+      }
+      // listen for new events
+      for await (const [data] of on(ee, "updateGame")) {
+        const gameId = data as string;
+        const game = await getGame({ input: { id: gameId }, ctx: opts.ctx });
+        // tracking the post id ensures the client can reconnect at any time and get the latest events this id
+        yield tracked(game.id, game);
+      }
     }),
 });
 

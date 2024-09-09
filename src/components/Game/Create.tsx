@@ -5,13 +5,15 @@ import { api } from "~/utils/api";
 
 type Props = {
   btnLabel: string;
+  onCreateGame?: () => void;
 }
-export const CreateGame: FC<Props> = ({ btnLabel }) => {
+export const CreateGame: FC<Props> = ({ btnLabel, onCreateGame }) => {
   const router = useRouter();
   const { mutateAsync: createGame, isPending } = api.game.create.useMutation();
 
   const handleCreateGame = async () => {
     const game = await createGame();
+    onCreateGame?.();
     void router.push(`/game/${game.id}`);
   };
 

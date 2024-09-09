@@ -82,15 +82,17 @@ const Game: FC<GameProps> = ({ gameId }) => {
       try {
         const { 
           isGameOver, 
-          numberOfGuesses, 
-          isGuessCorrect,
+          numberOfGuesses,
           statuses
         } = await makeGuess({ 
           guess: currentGuess,
           gameId,
         });
 
-        setGuesses([...guesses, { guess: currentGuess, statuses }]);
+        setGuesses([...guesses, { 
+          guess: currentGuess, 
+          statuses: statuses as TileProps['status'][],
+        }]);
         setCurrentGuess('');
 
         if (isGameOver || numberOfGuesses === MAX_GUESSES) {
@@ -147,7 +149,15 @@ const Game: FC<GameProps> = ({ gameId }) => {
           {guesses[guesses.length - 1]?.statuses.every(status => status === 'correct') 
             ? 'You won!' 
             : 'Game over!'}
-          <CreateGame btnLabel="Play Again" />
+          <CreateGame 
+            onCreateGame={() => {
+              // clear state
+              setGuesses([]);
+              setCurrentGuess('');
+              setGameOver(false);
+            }}
+            btnLabel="Play Again"
+          />
         </div>
       )}
     </div>

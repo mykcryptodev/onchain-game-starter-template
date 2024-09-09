@@ -1,9 +1,12 @@
 import { type PrismaClient } from "@prisma/client";
 import { tracked } from "@trpc/server";
 import EventEmitter, { on } from "events";
+import { createWalletClient, type Hex,http, parseAbi } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from "wagmi/chains";
 import { z } from "zod";
 
+import { WINNER_CONTRACT } from "~/constants";
 import { validWords } from "~/constants/words";
 import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
@@ -71,7 +74,7 @@ export const gameRouter = createTRPCRouter({
       }
 
       // Determine the status of each letter
-      const statuses: ('correct' | 'present' | 'absent')[] = Array(5).fill('absent');
+      const statuses = Array(5).fill('absent') as Array<'correct' | 'present' | 'absent'>;
       const wordArray = word.split('');
 
       // First pass: mark correct letters
@@ -85,7 +88,7 @@ export const gameRouter = createTRPCRouter({
       // Second pass: mark present letters
       for (let i = 0; i < 5; i++) {
         if (statuses[i] === 'absent') {
-          const index = wordArray.indexOf(guessLower[i]);
+          const index = wordArray.indexOf(guessLower[i]!);
           if (index !== -1) {
             statuses[i] = 'present';
             wordArray[index] = '#'; // Mark as used
@@ -105,7 +108,25 @@ export const gameRouter = createTRPCRouter({
       const isGuessCorrect = guessLower === word;
 
       if (isGuessCorrect) {
-        // ... existing code for recording winner ...
+        // write the winner onchain
+        const account = privateKeyToAccount(env.ADMIN_PRIVATE_KEY as Hex);
+        const client = createWalletClient({
+          account,
+          chain: baseSepolia,
+          transport: http()
+        });
+        try {
+          await client.writeContract({
+            address: WINNER_CONTRACT,
+            abi: parseAbi(['function recordWinner(string memory _gameId, address _winner, uint256 _guessCount)']),
+            functionName: 'recordWinner',
+            args: [game.id, account.address, BigInt(guessCount + 1)],
+          });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (e) {
+          console.log({ e });
+          throw new Error("Failed to record winner onchain: ");
+        }
       }
 
       return {

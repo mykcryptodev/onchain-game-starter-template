@@ -1,14 +1,16 @@
 import { getCsrfToken, signIn, useSession } from 'next-auth/react';
 import React, { type FC, useState } from 'react';
 import { SiweMessage } from 'siwe';
-import { useAccount, useSignMessage } from 'wagmi';
+import { useAccount, useDisconnect,useSignMessage } from 'wagmi';
 
 import { APP_NAME } from '~/constants';
 
 type Props = {
   btnLabel?: string;
+  showDisconnect?: boolean;
 }
-const SignInWithEthereum: FC<Props> = ({ btnLabel }) => {
+const SignInWithEthereum: FC<Props> = ({ btnLabel, showDisconnect }) => {
+  const { disconnect } = useDisconnect();
   const { data: sessionData } = useSession();
   const { signMessageAsync } = useSignMessage();
   const account = useAccount();
@@ -51,16 +53,26 @@ const SignInWithEthereum: FC<Props> = ({ btnLabel }) => {
   };
   if (sessionData?.user) return null;
   return (
-    <button 
-      onClick={promptToSign}
-      className="btn"
-      disabled={isSigningIn}
-    >
-      {isSigningIn && (
-        <div className="loading loading-spinner" />
+    <div className="flex items-center gap-2">
+      <button 
+        onClick={promptToSign}
+        className="btn"
+        disabled={isSigningIn}
+      >
+        {isSigningIn && (
+          <div className="loading loading-spinner" />
+        )}
+        {btnLabel ?? 'Sign In with Ethereum'}
+      </button>
+      {showDisconnect && (
+        <button
+          onClick={() => disconnect()}
+          className="btn btn-ghost"
+        >
+          Disconnect
+        </button>
       )}
-      {btnLabel ?? 'Sign In with Ethereum'}
-    </button>
+    </div>
   );
 }
 

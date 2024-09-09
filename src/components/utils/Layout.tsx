@@ -34,7 +34,7 @@ export const Layout: FC<Props> = ({ children }) => {
             )}
             {/* user is connected but not signed in */}
             {address && !sessionData?.user && (
-              <SignInWithEthereum />
+              <SignInWithEthereum showDisconnect={true} />
             )}
             {/* user is connected and signed in */}
             {address && sessionData?.user && (

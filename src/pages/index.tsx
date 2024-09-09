@@ -20,7 +20,7 @@ export default function Home() {
       </Head>
       <main className="flex flex-col justify-center">
         <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          <h1 className="text-5xl font-extrabold tracking-tight">
+          <h1 className="text-5xl font-extrabold tracking-tight text-center">
             {APP_NAME}
           </h1>
           {!address && (

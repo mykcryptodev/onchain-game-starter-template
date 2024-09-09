@@ -89,3 +89,13 @@ Refer to the README in the `/solidity` folder for instructions on writing, testi
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Wordle Example
+
+In this repo example the game is Wordle. Users have 6 guesses to guess the 5 letter word. Winners are recorded onchain.
+
+Here is a breakdown of how the repo is used to make the game work:
+
+- **Connect Wallet With OnchainKit**: Users must connect their wallet. Think of this as a universal identity that is used across many onchain apps. Users can bring their identity with them. You can inspect their connected address to learn more about the users who are playing your game.
+- **NextAuth & Sign In With Ethereum**: Users sign a message to prove that they own the wallet that they have connected with. Until this step is complete, you cannot be certain if the connected wallet address is being spoofed or not. When a users signs a message and sends it to your backend, only then can you be certain that the owner of the wallet is connecting to your app. This repo creates a session with NextAuth and creates a user record in the web2 database for this wallet address if it does not already exist. Subsequent requests will have this user in the session that can be inspected before executing any game logic.
+- **Web2 Database vs Blockchain**: The blockchain is public and so any data that is written there is readable by anyone. In the Wordle game, we do not want the user to know the answer to the puzzle and so we store it in the web2 (private) database. When the user submits a guess, we can be confident that they are truly guessing the word and we compare their guess to the private word that we store in the web2 database. You may have data for your game that you do not want users to access. This pattern will keep data a secret from the user. When a user wins, we want to make that information public and usable by other onchain apps. We write the winners information to the blockchain using viem. Due to the way the smart contract was written, only our admin wallet can store data in the smart contract. Other apps can feel confident knowing that if the data exists in the smart contract, it was our app that wrote the data.

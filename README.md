@@ -55,6 +55,25 @@ The application is built using [Next.js](https://nextjs.org/), a powerful React 
 
 ## Getting Started
 
+**Obtain your environment variables**
+1. DATABASE_URL is the url of your postgres database. You can use a service like [supabase](https://https://supabase.com/) or [planetscale](https://planetscale.com/) to host a postgres db. When using a URL from a hosted service, add these query parameters to the end of your url:
+```
+?pgbouncer=true&connection_limit=1
+```
+The database url defaults to your local docker environment
+2. For the Next Auth secret, generate a secret on your command line with this command:
+```
+openssl rand -base64 32
+```
+3. Your Next Auth Url is the url of where your app is hosted. If you are running this locally, leave it as
+```
+http://localhost:3000
+```
+4. A Coinbase Developer Platform (CDP) api key is necessary for OnchainKit. Get one for free at the [CDP portal](https://portal.cdb.coinbase.com)
+5. A WalletConnect project id is used by many wallet connection providers. Get one for free at [Wallet Connect](https://cloud.walletconnect.com)
+6. Your Admin's private key is used to write transactions from your Next.js backend to the blockchain. Be careful when exporting your private key from a wallet. Anyone with this key can transfer funds from your account. Use an account with a small amount of funds or look into alternatives for sending transactions like [Thirdweb Engine](https://thirdweb.com/engine). 
+
+**Start your app locally**
 1. Clone this repository
 2. Install dependencies:
    ```

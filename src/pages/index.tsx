@@ -1,9 +1,16 @@
 import Head from "next/head";
+import { useSession } from "next-auth/react";
+import { useAccount } from "wagmi";
 
-import Game from "~/components/Game";
+import CreateGame from "~/components/Game/Create";
+import { Wallet } from "~/components/Wallet";
+import SignInWithEthereum from "~/components/Wallet/SignIn";
 import { APP_DESCRIPTION, APP_NAME } from "~/constants";
 
 export default function Home() {
+  const { address } = useAccount();
+  const { data: sessionData } = useSession();
+  
   return (
     <>
       <Head>
@@ -16,7 +23,15 @@ export default function Home() {
           <h1 className="text-5xl font-extrabold tracking-tight">
             {APP_NAME}
           </h1>
-          <Game />
+          {!address && (
+            <Wallet btnLabel="Connect Wallet To Play" />
+          )}
+          {!sessionData?.user && (
+            <SignInWithEthereum btnLabel="Sign In To Play" />
+          )}
+          {address && sessionData?.user && (
+            <CreateGame btnLabel="Start Game" />
+          )}
         </div>
       </main>
     </>

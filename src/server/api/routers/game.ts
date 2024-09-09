@@ -1,23 +1,111 @@
 import { type PrismaClient } from "@prisma/client";
 import { tracked } from "@trpc/server";
 import EventEmitter, { on } from "events";
+import { baseSepolia } from "wagmi/chains";
 import { z } from "zod";
 
+import { validWords } from "~/constants/words";
+import { env } from "~/env";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "~/server/api/trpc";
 
 const ee = new EventEmitter();
 
+
 export const gameRouter = createTRPCRouter({
   create: protectedProcedure
-    .input(z.object({ 
-      name: z.string().min(1),
-    }))
     .mutation(async ({ ctx }) => {
+      // generate a random word from the word set
+      const word = Array.from(validWords)[Math.floor(Math.random() * validWords.size)];
+      if (!word) {
+        throw new Error("No word found");
+      }
+
       return await ctx.db.game.create({
         data: {
           createdById: ctx.session.user.id,
+          word,
         },
       });
+    }),
+  guess: protectedProcedure
+    .input(z.object({
+      gameId: z.string(),
+      guess: z.string().length(5),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { gameId, guess } = input;
+
+      // Check if the user has already made 6 guesses for this game
+      const guessCount = await ctx.db.gameGuess.count({
+        where: {
+          gameId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (guessCount >= 6) {
+        return {
+          isGameOver: true,
+          isGuessCorrect: false,
+          numberOfGuesses: guessCount,
+        }
+      }
+
+      // Create a new GameGuess
+      await ctx.db.gameGuess.create({
+        data: {
+          gameId,
+          userId: ctx.session.user.id,
+          guess,
+        },
+      });
+
+      // fetch the game
+      const game = await ctx.db.game.findUnique({
+        where: {
+          id: gameId,
+        },
+      });
+
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      if (guess.toLowerCase() === game.word.toLowerCase()) {
+        const res = await fetch(
+          `https://engine-production-3357.up.railway.app/contract/${baseSepolia.id}/0x6D00988154557822c026747aADA9438B0661091B/write`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${env.ENGINE_ACCESS_TOKEN}`,
+              "x-backend-wallet-address": `${env.ENGINE_WALLET_ADDRESS}`,
+            },
+            body: JSON.stringify({
+              functionName: "recordWinner",
+              args: [
+                1,
+                ctx.session.user.address,
+                guessCount + 1,
+              ],
+            }),
+          },
+        );
+        console.log({ res });
+
+        return {
+          isGameOver: true,
+          isGuessCorrect: true,
+          numberOfGuesses: guessCount,
+        }
+      }
+
+
+      return {
+        isGameOver: false,
+        isGuessCorrect: false,
+        numberOfGuesses: guessCount,
+      }
     }),
   onUpdate: publicProcedure
     .input(

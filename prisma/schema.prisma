@@ -52,7 +52,8 @@ model User {
     accounts      Account[]
     sessions      Session[]
 
-    Game Game[] @relation(name: "GameCreatedBy")
+    Game      Game[]      @relation(name: "GameCreatedBy")
+    GameGuess GameGuess[]
 }
 
 model VerificationToken {
@@ -67,4 +68,19 @@ model Game {
     id          String    @id @default(cuid())
     createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade, name: "GameCreatedBy")
     createdById String
+    word        String
+
+    GameGuess GameGuess[]
+}
+
+model GameGuess {
+    id          String    @id @default(cuid())
+    game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+    gameId      String
+    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+    userId      String
+    guess       String
+    createdAt   DateTime  @default(now())
+
+    @@unique([gameId, userId, guess])
 }

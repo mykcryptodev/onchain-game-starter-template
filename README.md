@@ -51,6 +51,7 @@ The application is built using [Next.js](https://nextjs.org/), a powerful React 
 
 - **Solidity**: The programming language for writing smart contracts
 - **Testing Environment**: Pre-configured setup for testing smart contracts before deployment
+- **Template**: Uses [pcaversaccio's solidity template](https://github.com/pcaversaccio/hardhat-project-template-ts) (see /solidity/README.md for more)
 
 ## Getting Started
 

@@ -1,12 +1,17 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.26;
 
 contract Wordle {
     address public admin;
 
-    mapping(uint256 => address[]) public winners;
-    mapping(uint256 => mapping(address => uint256)) public guessCount;
-    
-    event WinnerRecorded(uint256 indexed gameDay, address winner, uint256 guessCount);
+    mapping(string => address[]) public winners;
+    mapping(string => mapping(address => uint256)) public guessCount;
+
+    event WinnerRecorded(
+        string indexed gameDay,
+        address winner,
+        uint256 guessCount
+    );
 
     constructor() {
         admin = msg.sender;
@@ -22,7 +27,11 @@ contract Wordle {
         admin = newAdmin;
     }
 
-    function recordWinner(uint256 _gameId, address _winner, uint256 _guessCount) public onlyAdmin {
+    function recordWinner(
+        string memory _gameId,
+        address _winner,
+        uint256 _guessCount
+    ) public onlyAdmin {
         require(_guessCount > 0 && _guessCount <= 6, "Invalid guess count");
 
         winners[_gameId].push(_winner);
@@ -30,7 +39,9 @@ contract Wordle {
         emit WinnerRecorded(_gameId, _winner, _guessCount);
     }
 
-    function getGameResult(uint256 gameId) public view returns (address[] memory, uint256[] memory) {
+    function getGameResult(
+        string memory gameId
+    ) public view returns (address[] memory, uint256[] memory) {
         address[] memory gameWinners = winners[gameId];
         uint256[] memory guessCounts = new uint256[](gameWinners.length);
 

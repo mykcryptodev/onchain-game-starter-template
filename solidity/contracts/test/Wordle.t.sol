@@ -12,7 +12,7 @@ contract WordleGameTest is Test {
     }
 
     function testRecordWinner() public {
-        uint256 gameId = 1;
+        uint256 gameId = "1";
         address winner = address(0x1234);
         uint256 guessCount = 4;
 
@@ -25,7 +25,7 @@ contract WordleGameTest is Test {
     }
 
     function testRecordMultipleWinners() public {
-        uint256 gameId = 2;
+        uint256 gameId = "2";
         address winner1 = address(0x1234);
         address winner2 = address(0x5678);
         uint256 guessCount1 = 3;

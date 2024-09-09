@@ -104,6 +104,19 @@ export const gameRouter = createTRPCRouter({
         }
       }
 
+      // if this was guessed already throw error
+      const existingGuess = await ctx.db.gameGuess.findFirst({
+        where: {
+          gameId,
+          userId: ctx.session.user.id,
+          guess: guessLower,
+        },
+      });
+
+      if (existingGuess) {
+        throw new Error("Guess already made");
+      }
+
       // Create a new GameGuess
       await ctx.db.gameGuess.create({
         data: {
@@ -174,6 +187,38 @@ export const gameRouter = createTRPCRouter({
       })));
 
       return guessesWithStatuses;
+    }),
+  getAnswerWord: protectedProcedure
+    .input(
+      z.object({
+        gameId: z.string(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { gameId } = input;
+
+      // Check if the user has made 6 guesses
+      const guessCount = await ctx.db.gameGuess.count({
+        where: {
+          gameId,
+          userId: ctx.session.user.id,
+        },
+      });
+
+      if (guessCount < 6) {
+        throw new Error("Not allowed to view answer yet");
+      }
+
+      const game = await ctx.db.game.findUnique({
+        where: { id: gameId },
+        select: { word: true },
+      });
+
+      if (!game) {
+        throw new Error("Game not found");
+      }
+
+      return game.word.toUpperCase();
     }),
   // This procedure is unused in this example but it showcases
   // how to subscribe to database updates from the client.

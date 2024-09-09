@@ -65,6 +65,10 @@ const Game: FC<GameProps> = ({ gameId }) => {
   const { data: fetchedGuesses, isLoading } = api.game.getGuesses.useQuery({
     gameId,
   });
+  const { data: answerWord, refetch: refetchAnswerWord } = api.game.getAnswerWord.useQuery(
+    { gameId },
+    { enabled: false }
+  );
   const [guesses, setGuesses] = useState<
     Array<{ guess: string; statuses: TileProps["status"][] }>
   >([]);
@@ -89,8 +93,9 @@ const Game: FC<GameProps> = ({ gameId }) => {
           (status) => status === "correct"
         ) ?? false)
       );
+      void refetchAnswerWord();
     }
-  }, [fetchedGuesses]);
+  }, [fetchedGuesses, refetchAnswerWord]);
 
   const handleKeyDown = async (event: React.KeyboardEvent) => {
     if (gameOver) return;
@@ -113,6 +118,7 @@ const Game: FC<GameProps> = ({ gameId }) => {
 
         if (isGameOver || numberOfGuesses === MAX_GUESSES) {
           setGameOver(true);
+          void refetchAnswerWord();
           // if everything is correct, toast a win
           if (statuses.every((status) => status === "correct")) {
             toast.success("You won!");
@@ -123,10 +129,13 @@ const Game: FC<GameProps> = ({ gameId }) => {
       } catch (error) {
         const e = error as Error;
         if (e.message.includes("valid word")) {
-          toast.error("Not a word.");
-        } else {
-          toast.error("An error occurred. Please try again.");
+          return toast.error("Not a word.");
         }
+        if (e.message.includes("Guess already made")) {
+          return toast.error("You already guessed that.");
+        }
+
+        return toast.error("An error occurred. Please try again.");
       }
     } else if (event.key === "Backspace") {
       setCurrentGuess(currentGuess.slice(0, -1));
@@ -191,6 +200,7 @@ const Game: FC<GameProps> = ({ gameId }) => {
           )
             ? "You won!"
             : "Game over!"}
+          {answerWord && <div>The word was: {answerWord}</div>}
           <CreateGame
             onCreateGame={() => {
               // clear state

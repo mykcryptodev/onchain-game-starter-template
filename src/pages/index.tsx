@@ -26,7 +26,7 @@ export default function Home() {
           {!address && (
             <Wallet btnLabel="Connect Wallet To Play" />
           )}
-          {!sessionData?.user && (
+          {address && !sessionData?.user && (
             <SignInWithEthereum btnLabel="Sign In To Play" />
           )}
           {address && sessionData?.user && (

@@ -1,6 +1,6 @@
-# Web3 Game Development Starter Kit
+# Onchain Game Development Starter Kit
 
-This repository provides a comprehensive starter kit for developers familiar with web2 technologies who want to build web3 games. It combines the power of modern web development tools with blockchain integration, offering a seamless experience for creating decentralized gaming applications.
+This repository provides a comprehensive starter kit for developers familiar with web2 technologies who want to build onchain games. It combines the power of modern web development tools with blockchain integration, offering a seamless experience for creating decentralized gaming applications.
 
 ## High-Level Architecture
 
@@ -9,7 +9,7 @@ This starter kit is built on the [T3 Stack](https://create.t3.gg/), which provid
 1. **Frontend**: Next.js with React, styled using Tailwind CSS and DaisyUI
 2. **API Layer**: tRPC for type-safe API endpoints
 3. **Web2 Backend**: PostgreSQL database with Prisma ORM
-4. **Web3 Backend**: Connection to the Base Sepolia testnet (EVM-compatible blockchain)
+4. **Onchain Backend**: Connection to the Base Sepolia testnet (EVM-compatible blockchain)
 5. **Authentication**: NextAuth.js with Sign In With Ethereum (SIWE) support
 6. **Smart Contract Development**: Solidity contracts with testing setup
 
@@ -29,7 +29,7 @@ The application is built using [Next.js](https://nextjs.org/), a powerful React 
 - **Prisma**: An ORM that provides type-safe database queries and model definitions
 - **tRPC Procedures**: Used to interact with the database, ensuring type safety from the database to the frontend
 
-### Web3 Backend
+### Onchain Backend
 
 - **Base Sepolia**: The default testnet for this starter kit (easily configurable to other EVM-compatible networks)
 - **Viem and Wagmi**: Libraries for interacting with the blockchain

@@ -1,35 +1,90 @@
-# Create T3 App
+# Web3 Game Development Starter Kit
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+This repository provides a comprehensive starter kit for developers familiar with web2 technologies who want to build web3 games. It combines the power of modern web development tools with blockchain integration, offering a seamless experience for creating decentralized gaming applications.
 
-## What's next? How do I make an app with this?
+## High-Level Architecture
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+This starter kit is built on the [T3 Stack](https://create.t3.gg/), which provides a robust foundation for full-stack, typesafe web development. The architecture consists of:
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+1. **Frontend**: Next.js with React, styled using Tailwind CSS and DaisyUI
+2. **API Layer**: tRPC for type-safe API endpoints
+3. **Web2 Backend**: PostgreSQL database with Prisma ORM
+4. **Web3 Backend**: Connection to the Base Sepolia testnet (EVM-compatible blockchain)
+5. **Authentication**: NextAuth.js with Sign In With Ethereum (SIWE) support
+6. **Smart Contract Development**: Solidity contracts with testing setup
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## Technology Deep Dive
+
+### Next.js and T3 Stack
+
+The application is built using [Next.js](https://nextjs.org/), a powerful React framework for building web applications. The T3 Stack adds additional tools and best practices:
+
+- **TypeScript**: Used throughout the app for type safety
+- **tRPC**: Enables the creation of type-safe API endpoints
+- **Tailwind CSS**: A utility-first CSS framework for rapid UI development
+
+### Web2 Backend
+
+- **PostgreSQL**: An open-source relational database
+- **Prisma**: An ORM that provides type-safe database queries and model definitions
+- **tRPC Procedures**: Used to interact with the database, ensuring type safety from the database to the frontend
+
+### Web3 Backend
+
+- **Base Sepolia**: The default testnet for this starter kit (easily configurable to other EVM-compatible networks)
+- **Viem and Wagmi**: Libraries for interacting with the blockchain
+- **OnchainKit**: A library for frontend blockchain interactions, including wallet connection and Coinbase Smart Wallet integration
+
+### Frontend
+
+- **React**: A popular library for building user interfaces
+- **Tailwind CSS**: Used for styling components
+- **DaisyUI**: A component library built on top of Tailwind, providing ready-to-use UI components and theming capabilities
+
+### Authentication
+
+- **NextAuth**: Handles user authentication
+- **Sign In With Ethereum (SIWE)**: Allows users to authenticate using their crypto wallets
+- **Session Management**: Enables secure, wallet-based authentication for backend requests
+
+### Smart Contract Development
+
+- **Solidity**: The programming language for writing smart contracts
+- **Testing Environment**: Pre-configured setup for testing smart contracts before deployment
+
+## Getting Started
+
+1. Clone this repository
+2. Install dependencies:
+   ```
+   bun install
+   ```
+3. Start the local PostgreSQL database (using Docker):
+   ```
+   ./start-database.sh
+   ```
+4. Push the Prisma schema to the database:
+   ```
+   bun run db:push
+   ```
+5. Start the development server:
+   ```
+   bun run dev
+   ```
+
+## Smart Contract Development
+
+Refer to the README in the `/solidity` folder for instructions on writing, testing, and deploying smart contracts.
 
 ## Learn More
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- [T3 Stack Documentation](https://create.t3.gg/)
+- [Next.js Documentation](https://nextjs.org/docs)
+- [OnchainKit Documentation](https://onchainkit.xyz/)
+- [Prisma Documentation](https://www.prisma.io/docs)
+- [tRPC Documentation](https://trpc.io/docs)
+- [DaisyUI Documentation](https://daisyui.com/)
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Contributing
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
-
-## How do I deploy this?
-
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
-
-## Get Started
-1. Install dependencies with `bun install`
-2. Start your local web2-db by running `./start-database.sh`
-3. Push your db schema to the db by running `bun run db:push`
-4. Start your local server by running `bun run dev`
+Contributions are welcome! Please feel free to submit a Pull Request.

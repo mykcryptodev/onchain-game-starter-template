@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/prefer-regexp-exec */
+import Link from "next/link";
 import type { FC } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
@@ -74,6 +75,7 @@ const Game: FC<GameProps> = ({ gameId }) => {
   >([]);
   const [currentGuess, setCurrentGuess] = useState<string>("");
   const [gameOver, setGameOver] = useState<boolean>(false);
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
 
   const gameRef = useRef<HTMLDivElement>(null);
 
@@ -102,7 +104,7 @@ const Game: FC<GameProps> = ({ gameId }) => {
 
     if (event.key === "Enter" && currentGuess.length === WORD_LENGTH) {
       try {
-        const { isGameOver, numberOfGuesses, statuses } = await makeGuess({
+        const { isGameOver, numberOfGuesses, statuses, txHash } = await makeGuess({
           guess: currentGuess,
           gameId,
         });
@@ -115,6 +117,10 @@ const Game: FC<GameProps> = ({ gameId }) => {
           },
         ]);
         setCurrentGuess("");
+
+        if (txHash) {
+          setTxHash(txHash);
+        }
 
         if (isGameOver || numberOfGuesses === MAX_GUESSES) {
           setGameOver(true);
@@ -201,12 +207,22 @@ const Game: FC<GameProps> = ({ gameId }) => {
             ? "You won!"
             : "Game over!"}
           {answerWord && <div>The word was: {answerWord}</div>}
+          {txHash && (
+            <Link
+              href={`https://sepolia.basescan.org/tx/${txHash}`}
+              passHref
+              className="btn btn-link btn-sm"
+            >
+              Your victory is recorded onchain!
+            </Link>
+          )}
           <CreateGame
             onCreateGame={() => {
               // clear state
               setGuesses([]);
               setCurrentGuess("");
               setGameOver(false);
+              setTxHash(null);
             }}
             btnLabel="Play Again"
           />

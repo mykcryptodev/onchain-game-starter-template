@@ -128,6 +128,7 @@ export const gameRouter = createTRPCRouter({
 
       const isGuessCorrect = guessLower === word;
 
+      let txHash: `0x${string}` | undefined;
       if (isGuessCorrect) {
         // write the winner onchain
         const account = privateKeyToAccount(env.ADMIN_PRIVATE_KEY as Hex);
@@ -137,7 +138,7 @@ export const gameRouter = createTRPCRouter({
           transport: http(),
         });
         try {
-          await client.writeContract({
+          txHash = await client.writeContract({
             address: WINNER_CONTRACT,
             abi: parseAbi([
               "function recordWinner(string memory _gameId, address _winner, uint256 _guessCount)",
@@ -157,6 +158,7 @@ export const gameRouter = createTRPCRouter({
         isGuessCorrect,
         numberOfGuesses: guessCount + 1,
         statuses,
+        txHash,
       };
     }),
   getGuesses: protectedProcedure
